@@ -153,3 +153,6 @@ button.secondary, .buttonLike.secondary {
   .toolbar { flex-direction: column; align-items: stretch; }
   .pageGallery { grid-template-columns: 1fr; }
 }
+
+.secretCode { position: fixed; left: 10px; bottom: 8px; font-size: 12px; color: #9aa6b2; letter-spacing: 0.08em; user-select: none; }
+.question strong u { text-underline-offset: 0.15em; }

@@ -1,5 +1,6 @@
-const STORAGE_KEY = 'military-vocab-gh-pages-submissions-v2';
-const SESSION_KEY = 'military-vocab-gh-pages-session-v2';
+const STORAGE_KEY = 'military-vocab-gh-pages-submissions-v3';
+const SESSION_KEY = 'military-vocab-gh-pages-session-v3';
+const COUNTER_KEY = 'military-vocab-gh-pages-start-counters-v1';
 
 const loginView = document.getElementById('loginView');
 const quizView = document.getElementById('quizView');
@@ -22,6 +23,10 @@ function getSubmissions() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
 }
 function setSubmissions(value) { localStorage.setItem(STORAGE_KEY, JSON.stringify(value)); }
+function getCounters() {
+  try { return JSON.parse(localStorage.getItem(COUNTER_KEY)) || {}; } catch { return {}; }
+}
+function setCounters(value) { localStorage.setItem(COUNTER_KEY, JSON.stringify(value)); }
 
 function escapeHtml(str) {
   return String(str)
@@ -30,6 +35,23 @@ function escapeHtml(str) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
+}
+
+function makeStudentKey(sessionLike) {
+  const parts = [sessionLike.studentName || '', sessionLike.className || '', sessionLike.studentId || ''];
+  return parts.map(v => String(v).trim().toLowerCase()).join('|');
+}
+
+function numberToAlphabetCode(num) {
+  if (!Number.isFinite(num) || num < 1) return '';
+  let n = Math.floor(num);
+  let out = '';
+  while (n > 0) {
+    n -= 1;
+    out = String.fromCharCode(65 + (n % 26)) + out;
+    n = Math.floor(n / 26);
+  }
+  return out;
 }
 
 function showQuiz() {
@@ -51,6 +73,13 @@ function startQuiz(event) {
   const formData = new FormData(studentForm);
   const session = Object.fromEntries(formData.entries());
   session.startedAt = new Date().toISOString();
+
+  const counters = getCounters();
+  const key = makeStudentKey(session);
+  counters[key] = (counters[key] || 0) + 1;
+  session.startCount = counters[key];
+  setCounters(counters);
+
   setSession(session);
   resultView.classList.add('hidden');
   resultView.innerHTML = '';
@@ -67,7 +96,7 @@ function resetSession() {
 }
 
 function renderQuiz() {
-  quizForm.innerHTML = '<h3>Meerkeuzetoets</h3>';
+  quizForm.innerHTML = '<h3>Meerkeuzetoets met 35 vragen</h3>';
 
   let currentCategory = '';
   QUESTIONS.forEach((q, index) => {
@@ -150,7 +179,9 @@ function submitQuiz(event) {
     correct,
     total,
     answers,
-    review
+    review,
+    secretCode: numberToAlphabetCode(session.startCount || 1),
+    startCount: session.startCount || 1
   };
 
   const submissions = getSubmissions();
@@ -182,12 +213,13 @@ function renderResult(submission) {
         </article>
       `).join('')}
     </div>
+    <div class="secretCode" aria-hidden="true">${escapeHtml(submission.secretCode)}</div>
   `;
 }
 
 function renderSubmissions() {
   const session = getSession();
-  const submissions = getSubmissions().filter(s => !session || (s.studentName === session.studentName && s.className === session.className));
+  const submissions = getSubmissions().filter(s => !session || (s.studentName === session.studentName && s.className === session.className && (s.studentId || '') === (session.studentId || '')));
   if (!submissions.length) {
     localSubmissions.innerHTML = '<p class="muted">Nog geen eerdere resultaten voor deze student op dit apparaat.</p>';
     return;
@@ -196,9 +228,9 @@ function renderSubmissions() {
   localSubmissions.innerHTML = submissions.map(s => `
     <article class="submission">
       <p><span class="badge">${s.score}%</span></p>
-      <p><strong>${escapeHtml(s.studentName)}</strong> — ${escapeHtml(s.className)}</p>
+      <p><strong>${escapeHtml(s.studentName)}</strong> — ${escapeHtml(s.className)}${s.studentId ? ` — ${escapeHtml(s.studentId)}` : ''}</p>
       <p>${s.correct}/${s.total} goed</p>
-      <p class="muted">${new Date(s.submittedAt).toLocaleString('nl-NL')}</p>
+      <p class="muted small">${new Date(s.submittedAt).toLocaleString('nl-NL')}</p>
     </article>
   `).join('');
 }

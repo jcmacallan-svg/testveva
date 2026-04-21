@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Military Vocabulary Quiz - GitHub Pages</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="hero card">
+      <h1>Military Vocabulary Quiz</h1>
+      <p>GitHub Pages-versie — meerkeuzevragen Engels → Nederlands, automatisch nakijken.</p>
+      <p class="muted">Gebaseerd op pagina 4 t/m 16 van de syllabus.</p>
+    </header>
+
+    <section id="loginView" class="card">
+      <h2>Student aanmelden</h2>
+      <form id="studentForm" class="stack">
+        <label>Naam
+          <input type="text" name="studentName" required />
+        </label>
+        <label>Klas
+          <input type="text" name="className" required />
+        </label>
+        <label>Studentnummer (optioneel)
+          <input type="text" name="studentId" />
+        </label>
+        <button type="submit">Start toets</button>
+      </form>
+      <p class="muted">Let op: GitHub Pages heeft geen server. Resultaten en uploads worden alleen in deze browser opgeslagen.</p>
+    </section>
+
+    <section id="quizView" class="hidden">
+      <div class="card toolbar">
+        <div>
+          <h2>Toets</h2>
+          <p id="studentSummary" class="muted"></p>
+        </div>
+        <div class="actions">
+          <button id="resetSession" class="secondary">Nieuwe student</button>
+        </div>
+      </div>
+
+      <section class="card">
+        <h3>Instructie</h3>
+        <ol>
+          <li>Beantwoord alle vragen.</li>
+          <li>Klik op <strong>Nakijken</strong>.</li>
+          <li>Upload daarna een screenshot van je resultaat.</li>
+          <li>Download je inzending als JSON-bestand en lever dat in bij de docent.</li>
+        </ol>
+      </section>
+
+      <form id="quizForm" class="card stack"></form>
+      <section id="resultView" class="card hidden"></section>
+      <section class="card">
+        <h3>Lokale inzendingen op dit apparaat</h3>
+        <div id="localSubmissions" class="stack"></div>
+      </section>
+    </section>
+  </main>
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

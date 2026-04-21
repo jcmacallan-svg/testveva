@@ -1,0 +1,108 @@
+:root {
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --text: #1c2733;
+  --muted: #667587;
+  --line: #d8e0ea;
+  --primary: #184a8b;
+  --primary-hover: #123867;
+  --success: #157347;
+  --danger: #b42318;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.hero { margin-bottom: 20px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+.stack > * + * { margin-top: 14px; }
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.actions { display: flex; gap: 10px; align-items: center; }
+button, .buttonLike {
+  border: none;
+  background: var(--primary);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+button:hover, .buttonLike:hover { background: var(--primary-hover); }
+.secondary {
+  background: #e7edf5;
+  color: var(--text);
+}
+.secondary:hover { background: #d9e2ee; }
+label { display: block; font-weight: 600; }
+input[type="text"], input[type="password"], input[type="file"] {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.question { border-top: 1px solid var(--line); padding-top: 14px; }
+.question:first-child { border-top: none; padding-top: 0; }
+.options label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 400;
+  margin: 8px 0;
+}
+.muted { color: var(--muted); }
+.error { color: var(--danger); font-weight: 700; }
+.success { color: var(--success); font-weight: 700; }
+.hidden { display: none; }
+.resultScore {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+.submission {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+}
+.submission img {
+  max-width: 240px;
+  display: block;
+  border-radius: 10px;
+  margin-top: 10px;
+  border: 1px solid var(--line);
+}
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+@media (max-width: 700px) {
+  .toolbar { flex-direction: column; align-items: flex-start; }
+  .actions { width: 100%; }
+}

@@ -11,6 +11,7 @@ const localSubmissions = document.getElementById('localSubmissions');
 const studentSummary = document.getElementById('studentSummary');
 const resetSessionBtn = document.getElementById('resetSession');
 const resultModal = document.getElementById('resultModal');
+const modalStudent = document.getElementById('modalStudent');
 const modalScore = document.getElementById('modalScore');
 const modalAnswered = document.getElementById('modalAnswered');
 const modalSecretCode = document.getElementById('modalSecretCode');
@@ -213,6 +214,7 @@ function submitQuiz(event) {
 }
 
 function openModal(submission) {
+  modalStudent.textContent = `Student: ${submission.studentName}`;
   modalScore.textContent = `${submission.score}%`;
   modalAnswered.textContent = `${submission.total} van ${submission.total}`;
   modalSecretCode.textContent = escapeHtml(submission.secretCode);

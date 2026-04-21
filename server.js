@@ -6,28 +6,61 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 
 const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, 'data');
 const PUBLIC_DIR = path.join(ROOT, 'public');
-const UPLOAD_DIR = path.join(PUBLIC_DIR, 'uploads');
+const RUNTIME_DIR = process.env.APP_DATA_DIR
+  ? path.resolve(process.env.APP_DATA_DIR)
+  : path.join(ROOT, 'storage');
+const DATA_DIR = path.join(RUNTIME_DIR, 'data');
+const UPLOAD_DIR = path.join(RUNTIME_DIR, 'uploads');
+const SEED_DIR = path.join(ROOT, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const SUBMISSIONS_FILE = path.join(DATA_DIR, 'submissions.json');
 const QUESTIONS_FILE = path.join(ROOT, 'questions.json');
 
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
+}
+
+function ensureFileFromSeed(target, seed, fallbackContent) {
+  if (fs.existsSync(target)) return;
+  if (seed && fs.existsSync(seed)) {
+    fs.copyFileSync(seed, target);
+    return;
+  }
+  fs.writeFileSync(target, fallbackContent, 'utf8');
+}
+
+ensureDir(RUNTIME_DIR);
+ensureDir(DATA_DIR);
+ensureDir(UPLOAD_DIR);
+ensureFileFromSeed(USERS_FILE, path.join(SEED_DIR, 'users.seed.json'), '[]\n');
+ensureFileFromSeed(SUBMISSIONS_FILE, path.join(SEED_DIR, 'submissions.seed.json'), '[]\n');
+
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
-  secret: 'military-vocab-quiz-secret',
+  secret: process.env.SESSION_SECRET || 'change-this-session-secret',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: isProduction,
+    maxAge: 1000 * 60 * 60 * 8
+  }
 }));
 app.use(express.static(PUBLIC_DIR));
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 function readJson(filePath, fallback) {
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (error) {
+  } catch (_error) {
     return fallback;
   }
 }
@@ -68,6 +101,10 @@ const upload = multer({
     }
     cb(null, true);
   }
+});
+
+app.get('/healthz', (_req, res) => {
+  res.status(200).json({ ok: true, uptime: process.uptime() });
 });
 
 app.get('/api/me', (req, res) => {
@@ -123,7 +160,7 @@ app.post('/api/submit', requireAuth, upload.single('screenshot'), (req, res) => 
   let answers;
   try {
     answers = JSON.parse(req.body.answers || '{}');
-  } catch (error) {
+  } catch (_error) {
     return res.status(400).json({ error: 'Antwoorden konden niet worden gelezen.' });
   }
 
@@ -206,4 +243,5 @@ app.use((err, _req, res, _next) => {
 
 app.listen(PORT, () => {
   console.log(`Military Vocabulary Quiz draait op http://localhost:${PORT}`);
+  console.log(`Runtime data directory: ${RUNTIME_DIR}`);
 });

@@ -13,11 +13,6 @@ A teacher/admin can:
 - view all submissions
 - see scores and uploaded screenshots
 
-## Demo accounts
-
-### Teacher
-- username: `docent`
-- password: `Welkom123!`
 
 ### Students
 - username: `student1` / password: `Welkom123!`

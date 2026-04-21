@@ -1,6 +1,0 @@
-[
-  {"username": "docent", "password": "Welkom123!", "role": "teacher", "name": "Docent Engels"},
-  {"username": "student1", "password": "Welkom123!", "role": "student", "name": "Student 1"},
-  {"username": "student2", "password": "Welkom123!", "role": "student", "name": "Student 2"},
-  {"username": "student3", "password": "Welkom123!", "role": "student", "name": "Student 3"}
-]

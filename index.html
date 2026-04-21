@@ -10,9 +10,30 @@
   <main class="container">
     <header class="hero card">
       <h1>Military Vocabulary Quiz</h1>
-      <p>GitHub Pages-versie — meerkeuzevragen Engels → Nederlands, automatisch nakijken.</p>
+      <p>Meerkeuzevragen Engels → Nederlands, automatisch nakijken, percentage tonen en daarna alle antwoorden laten zien.</p>
       <p class="muted">Gebaseerd op pagina 4 t/m 16 van de syllabus.</p>
     </header>
+
+    <section class="card imageStrip">
+      <div>
+        <h2>Bronpagina's</h2>
+        <p class="muted">Hieronder staan uitsneden van de PDF-pagina's die als visuele ondersteuning in de toets zijn opgenomen.</p>
+      </div>
+      <div class="pageGallery">
+        <figure>
+          <img src="assets/pages/page-04.png" alt="PDF pagina 4 met militaire termen" />
+          <figcaption>Pagina 4</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/pages/page-05.png" alt="PDF pagina 5 met militaire termen" />
+          <figcaption>Pagina 5</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/pages/page-06.png" alt="PDF pagina 6 met militaire termen" />
+          <figcaption>Pagina 6</figcaption>
+        </figure>
+      </div>
+    </section>
 
     <section id="loginView" class="card">
       <h2>Student aanmelden</h2>
@@ -28,7 +49,7 @@
         </label>
         <button type="submit">Start toets</button>
       </form>
-      <p class="muted">Let op: GitHub Pages heeft geen server. Resultaten en uploads worden alleen in deze browser opgeslagen.</p>
+      <p class="muted">Let op: GitHub Pages heeft geen server. Resultaten worden alleen in deze browser opgeslagen.</p>
     </section>
 
     <section id="quizView" class="hidden">
@@ -46,16 +67,17 @@
         <h3>Instructie</h3>
         <ol>
           <li>Beantwoord alle vragen.</li>
+          <li>Bij de zinnen vertaal je het <strong>dikgedrukte woord of de dikgedrukte woordgroep</strong>.</li>
           <li>Klik op <strong>Nakijken</strong>.</li>
-          <li>Upload daarna een screenshot van je resultaat.</li>
-          <li>Download je inzending als JSON-bestand en lever dat in bij de docent.</li>
+          <li>Je ziet meteen je resultaat in <strong>percentages</strong>.</li>
+          <li>Daaronder staan alle juiste antwoorden.</li>
         </ol>
       </section>
 
       <form id="quizForm" class="card stack"></form>
       <section id="resultView" class="card hidden"></section>
       <section class="card">
-        <h3>Lokale inzendingen op dit apparaat</h3>
+        <h3>Eerdere resultaten op dit apparaat</h3>
         <div id="localSubmissions" class="stack"></div>
       </section>
     </section>

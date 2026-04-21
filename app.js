@@ -1,5 +1,5 @@
-const STORAGE_KEY = 'military-vocab-gh-pages-submissions-v1';
-const SESSION_KEY = 'military-vocab-gh-pages-session-v1';
+const STORAGE_KEY = 'military-vocab-gh-pages-submissions-v2';
+const SESSION_KEY = 'military-vocab-gh-pages-session-v2';
 
 const loginView = document.getElementById('loginView');
 const quizView = document.getElementById('quizView');
@@ -52,11 +52,13 @@ function startQuiz(event) {
   const session = Object.fromEntries(formData.entries());
   session.startedAt = new Date().toISOString();
   setSession(session);
+  resultView.classList.add('hidden');
+  resultView.innerHTML = '';
   showQuiz();
 }
 
 function resetSession() {
-  if (!confirm('Nieuwe student starten? De lokale inzendingen blijven bewaard op dit apparaat.')) return;
+  if (!confirm('Nieuwe student starten? Eerdere resultaten op dit apparaat blijven bewaard.')) return;
   clearSession();
   resultView.classList.add('hidden');
   resultView.innerHTML = '';
@@ -67,16 +69,25 @@ function resetSession() {
 function renderQuiz() {
   quizForm.innerHTML = '<h3>Meerkeuzetoets</h3>';
 
+  let currentCategory = '';
   QUESTIONS.forEach((q, index) => {
+    if (q.category !== currentCategory) {
+      currentCategory = q.category;
+      const heading = document.createElement('div');
+      heading.className = 'categoryHeading';
+      heading.innerHTML = `<h4>${escapeHtml(currentCategory)}</h4>`;
+      quizForm.appendChild(heading);
+    }
+
     const section = document.createElement('section');
     section.className = 'question';
     section.innerHTML = `
-      <p><strong>${index + 1}. ${escapeHtml(q.question)}</strong></p>
+      <p><strong>${index + 1}.</strong> ${q.questionHtml}</p>
       <div class="options">
         ${q.options.map((option, i) => `
           <label>
             <input type="radio" name="q-${q.id}" value="${i}" required />
-            <span>${escapeHtml(option)}</span>
+            <span>${String.fromCharCode(65 + i)}. ${escapeHtml(option)}</span>
           </label>
         `).join('')}
       </div>
@@ -87,27 +98,14 @@ function renderQuiz() {
   const finalSection = document.createElement('section');
   finalSection.className = 'question stack';
   finalSection.innerHTML = `
-    <label>
-      Screenshot van je resultaat
-      <input type="file" id="screenshotInput" accept=".png,.jpg,.jpeg,.webp" required />
-    </label>
     <button type="submit">Nakijken</button>
-    <p class="muted small">Deze upload wordt alleen in de browser opgeslagen, niet online.</p>
+    <p class="muted small">Na het nakijken zie je meteen je percentage en daaronder alle goede antwoorden.</p>
   `;
   quizForm.appendChild(finalSection);
   quizForm.onsubmit = submitQuiz;
 }
 
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('Kon screenshot niet lezen.'));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function submitQuiz(event) {
+function submitQuiz(event) {
   event.preventDefault();
   const session = getSession();
   if (!session) return showQuiz();
@@ -128,22 +126,17 @@ async function submitQuiz(event) {
     if (isCorrect) correct += 1;
     review.push({
       id: q.id,
-      question: q.question,
+      category: q.category,
+      questionHtml: q.questionHtml,
       chosenIndex: chosen,
       chosenText: q.options[chosen],
       correctIndex: q.answer,
       correctText: q.options[q.answer],
-      isCorrect
+      isCorrect,
+      explanation: q.explanation || ''
     });
   }
 
-  const screenshotFile = document.getElementById('screenshotInput').files[0];
-  if (!screenshotFile) {
-    alert('Upload een screenshot van je resultaat.');
-    return;
-  }
-
-  const screenshotDataUrl = await fileToDataUrl(screenshotFile);
   const total = QUESTIONS.length;
   const score = Math.round((correct / total) * 100);
 
@@ -157,9 +150,7 @@ async function submitQuiz(event) {
     correct,
     total,
     answers,
-    review,
-    screenshotName: screenshotFile.name,
-    screenshotDataUrl
+    review
   };
 
   const submissions = getSubmissions();
@@ -168,7 +159,6 @@ async function submitQuiz(event) {
 
   renderResult(submission);
   renderSubmissions();
-  downloadSubmission(submission);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -178,46 +168,28 @@ function renderResult(submission) {
     <h3>Resultaat</h3>
     <p class="resultScore">${submission.score}%</p>
     <p class="success">${submission.correct} van ${submission.total} goed</p>
-    <p class="muted">Ingeleverd op ${new Date(submission.submittedAt).toLocaleString('nl-NL')}</p>
-    <p><strong>Belangrijk:</strong> je JSON-bestand wordt automatisch gedownload. Lever dat bestand samen met je screenshot in bij de docent.</p>
-    <p><img src="${submission.screenshotDataUrl}" alt="Screenshot van resultaat" /></p>
-    <div class="actions">
-      <button id="downloadAgain">Download inzending opnieuw</button>
-    </div>
+    <p class="muted">Nagekeken op ${new Date(submission.submittedAt).toLocaleString('nl-NL')}</p>
     <div class="answerReview">
+      <h4>Antwoordenoverzicht</h4>
       ${submission.review.map((item, i) => `
         <article class="${item.isCorrect ? 'good' : 'bad'}">
-          <p><strong>${i + 1}. ${escapeHtml(item.question)}</strong></p>
-          <p>Jouw antwoord: ${escapeHtml(item.chosenText)}</p>
-          ${item.isCorrect ? '<p class="success">Goed</p>' : `<p class="error">Fout — juiste antwoord: ${escapeHtml(item.correctText)}</p>`}
+          <p class="reviewCategory">${escapeHtml(item.category)}</p>
+          <p><strong>${i + 1}.</strong> ${item.questionHtml}</p>
+          <p>Jouw antwoord: <strong>${escapeHtml(item.chosenText)}</strong></p>
+          <p>Goed antwoord: <strong>${escapeHtml(item.correctText)}</strong></p>
+          ${item.isCorrect ? '<p class="success">Goed</p>' : '<p class="error">Fout</p>'}
+          ${item.explanation ? `<p class="muted small">${escapeHtml(item.explanation)}</p>` : ''}
         </article>
       `).join('')}
     </div>
   `;
-  document.getElementById('downloadAgain').addEventListener('click', () => downloadSubmission(submission));
-}
-
-function downloadSubmission(submission) {
-  const safeName = `${submission.studentName || 'student'}-${submission.className || 'klas'}`
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/gi, '-')
-    .replace(/^-|-$/g, '');
-  const blob = new Blob([JSON.stringify(submission, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${safeName || 'inzending'}-${new Date(submission.submittedAt).toISOString().slice(0,19).replaceAll(':','-')}.json`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
 }
 
 function renderSubmissions() {
   const session = getSession();
   const submissions = getSubmissions().filter(s => !session || (s.studentName === session.studentName && s.className === session.className));
   if (!submissions.length) {
-    localSubmissions.innerHTML = '<p class="muted">Nog geen lokale inzendingen voor deze student op dit apparaat.</p>';
+    localSubmissions.innerHTML = '<p class="muted">Nog geen eerdere resultaten voor deze student op dit apparaat.</p>';
     return;
   }
 
@@ -227,19 +199,8 @@ function renderSubmissions() {
       <p><strong>${escapeHtml(s.studentName)}</strong> — ${escapeHtml(s.className)}</p>
       <p>${s.correct}/${s.total} goed</p>
       <p class="muted">${new Date(s.submittedAt).toLocaleString('nl-NL')}</p>
-      <img src="${s.screenshotDataUrl}" alt="Screenshot van resultaat" />
-      <div class="actions">
-        <button data-id="${s.id}" class="downloadLocal secondary">Download JSON</button>
-      </div>
     </article>
   `).join('');
-
-  document.querySelectorAll('.downloadLocal').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const item = getSubmissions().find(s => s.id === btn.dataset.id);
-      if (item) downloadSubmission(item);
-    });
-  });
 }
 
 showQuiz();

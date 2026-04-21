@@ -6,7 +6,7 @@ body {
   color: #1b2430;
 }
 .container {
-  max-width: 980px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 24px;
 }
@@ -20,7 +20,7 @@ body {
 .hero h1 { margin-top: 0; }
 .stack { display: grid; gap: 16px; }
 label { display: grid; gap: 8px; font-weight: 600; }
-input[type="text"], input[type="file"] {
+input[type="text"] {
   width: 100%;
   padding: 12px;
   border: 1px solid #c9d1db;
@@ -50,11 +50,21 @@ button.secondary, .buttonLike.secondary {
   gap: 16px;
 }
 .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.categoryHeading {
+  background: #eef4ff;
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+.categoryHeading h4 {
+  margin: 0;
+  color: #0b4ecc;
+}
 .question {
   border-top: 1px solid #e8edf5;
   padding-top: 16px;
 }
 .question:first-child { border-top: 0; padding-top: 0; }
+.question p { line-height: 1.5; }
 .options { display: grid; gap: 10px; margin-top: 12px; }
 .options label {
   display: flex;
@@ -64,9 +74,14 @@ button.secondary, .buttonLike.secondary {
   border: 1px solid #d8dee8;
   border-radius: 10px;
   font-weight: 400;
+  background: #fcfdff;
+}
+.options label:hover {
+  border-color: #0b5fff;
+  background: #f3f7ff;
 }
 .muted { color: #607086; }
-.error { color: #b00020; }
+.error { color: #b00020; font-weight: 700; }
 .success { color: #0b7a31; font-weight: 700; }
 .badge {
   display: inline-block;
@@ -88,11 +103,6 @@ button.secondary, .buttonLike.secondary {
   display: grid;
   gap: 8px;
 }
-.submission img {
-  max-width: 260px;
-  border-radius: 8px;
-  border: 1px solid #d8dee8;
-}
 .answerReview {
   display: grid;
   gap: 10px;
@@ -103,10 +113,43 @@ button.secondary, .buttonLike.secondary {
   border-radius: 10px;
   padding: 12px;
 }
+.reviewCategory {
+  margin: 0 0 6px;
+  color: #0b4ecc;
+  font-size: 14px;
+  font-weight: 700;
+}
 .good { border-left: 6px solid #0b7a31; }
 .bad { border-left: 6px solid #c62828; }
 .small { font-size: 14px; }
+.imageStrip h2 { margin-top: 0; }
+.pageGallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+.pageGallery figure {
+  margin: 0;
+  border: 1px solid #d8dee8;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fafbfd;
+}
+.pageGallery img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: top;
+}
+.pageGallery figcaption {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #607086;
+}
 @media (max-width: 720px) {
   .container { padding: 14px; }
   .toolbar { flex-direction: column; align-items: stretch; }
+  .pageGallery { grid-template-columns: 1fr; }
 }

@@ -1,6 +1,6 @@
-const STORAGE_KEY = 'military-vocab-gh-pages-submissions-v3';
-const SESSION_KEY = 'military-vocab-gh-pages-session-v3';
-const COUNTER_KEY = 'military-vocab-gh-pages-start-counters-v1';
+const STORAGE_KEY = 'military-vocab-gh-pages-submissions-v4';
+const SESSION_KEY = 'military-vocab-gh-pages-session-v4';
+const COUNTER_KEY = 'military-vocab-gh-pages-start-counters-v2';
 
 const loginView = document.getElementById('loginView');
 const quizView = document.getElementById('quizView');
@@ -10,9 +10,25 @@ const resultView = document.getElementById('resultView');
 const localSubmissions = document.getElementById('localSubmissions');
 const studentSummary = document.getElementById('studentSummary');
 const resetSessionBtn = document.getElementById('resetSession');
+const resultModal = document.getElementById('resultModal');
+const modalScore = document.getElementById('modalScore');
+const modalAnswered = document.getElementById('modalAnswered');
+const modalSecretCode = document.getElementById('modalSecretCode');
+const acknowledgeBtn = document.getElementById('acknowledgeBtn');
+const showAnswersBtn = document.getElementById('showAnswersBtn');
+
+let pendingSubmission = null;
 
 studentForm.addEventListener('submit', startQuiz);
 resetSessionBtn.addEventListener('click', resetSession);
+acknowledgeBtn.addEventListener('click', () => closeModal(false));
+showAnswersBtn.addEventListener('click', () => closeModal(true));
+resultModal.addEventListener('click', (event) => {
+  if (event.target === resultModal) closeModal(false);
+});
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !resultModal.classList.contains('hidden')) closeModal(false);
+});
 
 function getSession() {
   try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
@@ -81,14 +97,17 @@ function startQuiz(event) {
   setCounters(counters);
 
   setSession(session);
+  pendingSubmission = null;
   resultView.classList.add('hidden');
   resultView.innerHTML = '';
   showQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function resetSession() {
   if (!confirm('Nieuwe student starten? Eerdere resultaten op dit apparaat blijven bewaard.')) return;
   clearSession();
+  pendingSubmission = null;
   resultView.classList.add('hidden');
   resultView.innerHTML = '';
   studentForm.reset();
@@ -125,10 +144,10 @@ function renderQuiz() {
   });
 
   const finalSection = document.createElement('section');
-  finalSection.className = 'question stack';
+  finalSection.className = 'question stack finalQuestion';
   finalSection.innerHTML = `
-    <button type="submit">Nakijken</button>
-    <p class="muted small">Na het nakijken zie je meteen je percentage en daaronder alle goede antwoorden.</p>
+    <button type="submit" class="submitBtn">Nakijken</button>
+    <p class="muted small">Na het nakijken zie je eerst je score in een pop-up en daarna het antwoordoverzicht.</p>
   `;
   quizForm.appendChild(finalSection);
   quizForm.onsubmit = submitQuiz;
@@ -188,9 +207,31 @@ function submitQuiz(event) {
   submissions.unshift(submission);
   setSubmissions(submissions);
 
-  renderResult(submission);
+  pendingSubmission = submission;
   renderSubmissions();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  openModal(submission);
+}
+
+function openModal(submission) {
+  modalScore.textContent = `${submission.score}%`;
+  modalAnswered.textContent = `${submission.total} van ${submission.total}`;
+  modalSecretCode.textContent = escapeHtml(submission.secretCode);
+  resultModal.classList.remove('hidden');
+  resultModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modalOpen');
+}
+
+function closeModal(scrollToAnswers) {
+  resultModal.classList.add('hidden');
+  resultModal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modalOpen');
+  if (!pendingSubmission) return;
+  renderResult(pendingSubmission);
+  if (scrollToAnswers) {
+    resultView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 function renderResult(submission) {

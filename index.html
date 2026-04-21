@@ -2,7 +2,8 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b5fff" />
   <title>Military Vocabulary Quiz - GitHub Pages</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -18,17 +19,17 @@
       <h2>Student aanmelden</h2>
       <form id="studentForm" class="stack">
         <label>Naam
-          <input type="text" name="studentName" required />
+          <input type="text" name="studentName" autocomplete="name" required />
         </label>
         <label>Klas
-          <input type="text" name="className" required />
+          <input type="text" name="className" autocomplete="organization" required />
         </label>
         <label>Studentnummer (optioneel)
-          <input type="text" name="studentId" />
+          <input type="text" name="studentId" inputmode="numeric" />
         </label>
         <button type="submit">Start toets</button>
       </form>
-      <p class="muted">Let op: GitHub Pages heeft geen server. Resultaten worden alleen in deze browser opgeslagen.</p>
+      <p class="muted">Deze GitHub Pages-versie werkt volledig in de browser en is geoptimaliseerd voor mobiel.</p>
     </section>
 
     <section id="quizView" class="hidden">
@@ -38,7 +39,7 @@
           <p id="studentSummary" class="muted"></p>
         </div>
         <div class="actions">
-          <button id="resetSession" class="secondary">Nieuwe student</button>
+          <button id="resetSession" class="secondary" type="button">Nieuwe student</button>
         </div>
       </div>
 
@@ -46,10 +47,10 @@
         <h3>Instructie</h3>
         <ol>
           <li>Beantwoord alle vragen.</li>
-          <li>Bij de zinnen vertaal je het <strong><u>dikgedrukte en onderstreepte woord of de woordgroep</u></strong>.</li>
+          <li>Vertaal in de zinnen het <strong><u>dikgedrukte en onderstreepte woord of de woordgroep</u></strong>.</li>
           <li>Klik op <strong>Nakijken</strong>.</li>
           <li>Je ziet meteen je resultaat in <strong>percentages</strong>.</li>
-          <li>Daaronder staan alle juiste antwoorden.</li>
+          <li>Daarna kun je de antwoorden bekijken.</li>
         </ol>
       </section>
 
@@ -61,6 +62,32 @@
       </section>
     </section>
   </main>
+
+  <div id="resultModal" class="modalOverlay hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modalCard">
+      <h2 id="modalTitle">Toets nagekeken</h2>
+      <div class="modalStats">
+        <div class="modalStat">
+          <div class="label">Percentage</div>
+          <div id="modalScore" class="value">0%</div>
+        </div>
+        <div class="modalStat">
+          <div class="label">Beantwoord</div>
+          <div id="modalAnswered" class="value">0 van 0</div>
+        </div>
+      </div>
+      <div class="modalNote">
+        <h3>Herinnering</h3>
+        <p>Maak een screenshot van dit resultaat, bewaar deze op je desktop en sla hem op in DULON Online bij Engels.</p>
+      </div>
+      <div class="modalActions">
+        <button id="acknowledgeBtn" class="primary" type="button">Begrepen</button>
+        <button id="showAnswersBtn" class="secondaryAction" type="button">Toon antwoorden</button>
+      </div>
+      <div id="modalSecretCode" class="secretCodeInModal" aria-hidden="true"></div>
+    </div>
+  </div>
+
   <script src="questions.js"></script>
   <script src="app.js"></script>
 </body>
